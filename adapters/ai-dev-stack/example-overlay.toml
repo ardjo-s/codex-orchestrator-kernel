@@ -1,0 +1,7 @@
+schema_version = 1
+
+[capabilities]
+root_judge = "configured-root"
+explorer = "configured-explorer"
+bounded_worker = "configured-worker"
+independent_verifier = "configured-verifier"

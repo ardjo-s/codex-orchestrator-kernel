@@ -1,0 +1,6 @@
+{
+  "name": "codex-orchestrator-kernel",
+  "version": "0.1.0",
+  "description": "Measure-first, direct-first orchestration guidance for Codex",
+  "skills": "./skills/"
+}
