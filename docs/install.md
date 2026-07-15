@@ -11,10 +11,25 @@ Codex Desktop may not inherit the shell `PATH`. Before enabling hooks, verify th
 
 ## Plugin
 
-The repository is a local marketplace through `.agents/plugins/marketplace.json`. Add the repository as a marketplace in Codex, install `codex-orchestrator-kernel`, then review and trust its command hooks. Restart the app after marketplace/plugin changes.
+The repository is a local marketplace through `.agents/plugins/marketplace.json`:
+
+```sh
+codex plugin marketplace add ardjo-s/codex-orchestrator-kernel
+codex plugin add codex-orchestrator-kernel@codex-orchestrator-kernel
+codex plugin list
+```
+
+The installed skill is `codex-orchestrator-kernel:orch-auto`. Review and trust its command hooks, then restart the app after marketplace/plugin changes.
 
 `doctor` reports hook activity from a last-seen handshake as `verified-active` or `not-observed`. It reports trust as `unknown` unless Codex exposes a stable machine-readable trust API.
 
 ## Uninstall
 
-Disable/remove the plugin, remove the installed binary, then delete the Kernel state directory if desired. The Kernel does not rewrite user-owned Codex configuration.
+```sh
+codex plugin remove codex-orchestrator-kernel@codex-orchestrator-kernel
+codex plugin marketplace remove codex-orchestrator-kernel
+```
+
+Remove the installed binary, then delete the Kernel state directory if desired. The Kernel does not rewrite user-owned Codex configuration.
+
+Building from source requires Rust 1.85 or newer.

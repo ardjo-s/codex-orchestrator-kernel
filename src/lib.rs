@@ -260,14 +260,25 @@ pub struct Event {
 
 pub fn state_root() -> Result<PathBuf, String> {
     if let Ok(path) = std::env::var("PLUGIN_DATA") {
-        return Ok(PathBuf::from(path));
+        return absolute_root(path, None);
     }
     if let Ok(path) = std::env::var("CODEX_HOME") {
-        return Ok(PathBuf::from(path).join("orchestrator"));
+        return absolute_root(path, Some("orchestrator"));
     }
-    std::env::var("HOME")
-        .map(|home| PathBuf::from(home).join(".codex/orchestrator"))
-        .map_err(|_| "PLUGIN_DATA, CODEX_HOME, and HOME are unset".into())
+    for variable in ["HOME", "USERPROFILE"] {
+        if let Ok(path) = std::env::var(variable) {
+            return absolute_root(path, Some(".codex/orchestrator"));
+        }
+    }
+    Err("PLUGIN_DATA, CODEX_HOME, HOME, and USERPROFILE are unset".into())
+}
+
+fn absolute_root(path: String, suffix: Option<&str>) -> Result<PathBuf, String> {
+    let root = PathBuf::from(path);
+    if !root.is_absolute() {
+        return Err("state root must be an absolute path".into());
+    }
+    Ok(suffix.map_or(root.clone(), |value| root.join(value)))
 }
 
 pub fn new_run_id() -> String {
@@ -292,6 +303,9 @@ pub fn append_event(root: &Path, event: &Event) -> Result<(), String> {
 }
 
 pub fn replay(root: &Path, run_id: &str) -> Result<Vec<Event>, String> {
+    if !valid_id(run_id) {
+        return Err("invalid run id".into());
+    }
     let file = File::open(root.join("runs").join(run_id).join("events.jsonl"))
         .map_err(|error| error.to_string())?;
     let mut seen = HashSet::new();
@@ -330,13 +344,19 @@ pub struct Proof {
 }
 
 pub fn can_complete(current_digest: &str, risk: Risk, proofs: &[Proof]) -> bool {
-    let minimum = proof_for(risk).len();
-    proofs.iter().filter(|proof| proof.required).count() >= minimum
-        && proofs.iter().filter(|proof| proof.required).all(|proof| {
-            proof.status == ProofStatus::Passed
-                && proof.repository_digest == current_digest
-                && proof.scope == risk
-        })
+    let expected: HashSet<&str> = proof_for(risk).into_iter().collect();
+    let mut satisfied = HashSet::new();
+    for proof in proofs.iter().filter(|proof| proof.required) {
+        if proof.status != ProofStatus::Passed
+            || proof.repository_digest != current_digest
+            || proof.scope != risk
+            || !expected.contains(proof.claim.as_str())
+            || !satisfied.insert(proof.claim.as_str())
+        {
+            return false;
+        }
+    }
+    satisfied == expected
 }
 
 #[derive(Debug, Clone, Deserialize)]
@@ -402,13 +422,20 @@ pub fn user_prompt_output(
     if input.hook_event_name != "UserPromptSubmit" {
         return serde_json::json!({"continue": true});
     }
-    match assist_context.filter(|context| !context.is_empty() && context.len() <= cap) {
-        Some(context) => serde_json::json!({
+    match assist_context.filter(|context| !context.is_empty()) {
+        Some(context) => {
+            let output = serde_json::json!({
             "hookSpecificOutput": {
                 "hookEventName": "UserPromptSubmit",
                 "additionalContext": context
             }
-        }),
+            });
+            if serde_json::to_vec(&output).is_ok_and(|bytes| bytes.len() <= cap) {
+                output
+            } else {
+                serde_json::json!({"continue": true})
+            }
+        }
         None => serde_json::json!({"continue": true}),
     }
 }

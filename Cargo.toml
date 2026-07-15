@@ -2,6 +2,7 @@
 name = "codex-orchestrator-kernel"
 version = "0.1.0"
 edition = "2024"
+rust-version = "1.85"
 license = "MIT"
 description = "Deterministic, direct-first orchestration policy for Codex"
 repository = "https://github.com/ardjo-s/codex-orchestrator-kernel"

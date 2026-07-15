@@ -99,20 +99,22 @@ fn ledger_replay_is_idempotent_and_run_isolated() {
     let mut traversal = event.clone();
     traversal.run_id = "..".into();
     assert!(append_event(root.path(), &traversal).is_err());
+    assert!(replay(root.path(), "../r1").is_err());
+    assert!(replay(root.path(), "").is_err());
 }
 
 #[test]
 fn proof_is_bound_to_risk_and_current_digest() {
     let low = vec![
         Proof {
-            claim: "check".into(),
+            claim: "targeted_check".into(),
             required: true,
             status: ProofStatus::Passed,
             repository_digest: "d1".into(),
             scope: Risk::Low,
         },
         Proof {
-            claim: "diff".into(),
+            claim: "diff_inspection".into(),
             required: true,
             status: ProofStatus::Passed,
             repository_digest: "d1".into(),
@@ -122,6 +124,13 @@ fn proof_is_bound_to_risk_and_current_digest() {
     assert!(can_complete("d1", Risk::Low, &low));
     assert!(!can_complete("d2", Risk::Low, &low));
     assert!(!can_complete("d1", Risk::High, &low));
+
+    let duplicates = vec![low[0].clone(), low[0].clone()];
+    assert!(!can_complete("d1", Risk::Low, &duplicates));
+
+    let mut unknown = low.clone();
+    unknown[1].claim = "arbitrary".into();
+    assert!(!can_complete("d1", Risk::Low, &unknown));
 }
 
 #[test]

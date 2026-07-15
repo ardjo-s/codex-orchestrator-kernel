@@ -17,7 +17,7 @@ This repository owns the public, model-neutral Codex Orchestrator Kernel and its
 cargo fmt --check
 cargo clippy --all-targets -- -D warnings
 cargo test
-codex-orchestrator benchmark --dry-run
+cargo run --quiet -- benchmark --dry-run
 ```
 
 ## Safety gates

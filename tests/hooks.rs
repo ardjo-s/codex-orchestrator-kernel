@@ -18,7 +18,7 @@ fn direct_shadow_adds_no_model_context() {
 
 #[test]
 fn assist_context_is_bounded() {
-    let short = user_prompt_output(&input("UserPromptSubmit", false), Some("use explorer"), 64);
+    let short = user_prompt_output(&input("UserPromptSubmit", false), Some("use explorer"), 128);
     assert_eq!(
         short["hookSpecificOutput"]["hookEventName"],
         "UserPromptSubmit"
@@ -29,6 +29,13 @@ fn assist_context_is_bounded() {
         4,
     );
     assert_eq!(long, serde_json::json!({"continue": true}));
+
+    let escaped = user_prompt_output(
+        &input("UserPromptSubmit", false),
+        Some("\\\"\\\"\\\"\\\""),
+        64,
+    );
+    assert_eq!(escaped, serde_json::json!({"continue": true}));
 }
 
 #[test]
