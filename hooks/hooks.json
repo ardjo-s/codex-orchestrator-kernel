@@ -1,0 +1,29 @@
+{
+  "hooks": {
+    "UserPromptSubmit": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "codex-orchestrator hook user-prompt-submit",
+            "commandWindows": "codex-orchestrator.exe hook user-prompt-submit",
+            "timeout": 2,
+            "statusMessage": "Checking orchestration benefit"
+          }
+        ]
+      }
+    ],
+    "Stop": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "codex-orchestrator hook stop",
+            "commandWindows": "codex-orchestrator.exe hook stop",
+            "timeout": 2
+          }
+        ]
+      }
+    ]
+  }
+}

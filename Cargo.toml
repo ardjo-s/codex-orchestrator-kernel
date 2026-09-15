@@ -1,0 +1,20 @@
+[package]
+name = "codex-orchestrator-kernel"
+version = "0.1.0"
+edition = "2024"
+rust-version = "1.85"
+license = "MIT"
+description = "Deterministic, direct-first orchestration policy for Codex"
+repository = "https://github.com/ardjo-s/codex-orchestrator-kernel"
+
+[[bin]]
+name = "codex-orchestrator"
+path = "src/main.rs"
+
+[dependencies]
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+toml = "0.9"
+
+[dev-dependencies]
+tempfile = "3"

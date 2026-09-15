@@ -1,0 +1,12 @@
+schema_version = 1
+
+[limits]
+assist_context_bytes = 512
+max_repairs = 1
+
+[promotion]
+min_accepted = 20
+max_critical_false_negatives = 0
+min_classification_accuracy = 0.90
+max_trivial_overhead_pct = 2.0
+min_complex_savings_pct = 15.0
